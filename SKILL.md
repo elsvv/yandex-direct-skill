@@ -1,6 +1,12 @@
 ---
 name: yandex-direct
-description: Comprehensive reference for working with the Yandex Direct API v5 via curl/bash. Use when the user asks to manage Yandex Direct campaigns, ad groups, ads, keywords, bids, targeting, reports, statistics, dictionaries, or any other Yandex Direct API operation. Also use when writing scripts or automation that interacts with api.direct.yandex.com, when configuring OAuth tokens for Yandex Direct, or when the user mentions Yandex Direct, Direct API, or any Direct API service name. Triggers: Yandex Direct, Direct API, campaigns API, ad management API, keyword bids, Yandex advertising API, Direct reports, Direct statistics.
+description: |
+  Manage Yandex Direct campaigns, ads, keywords, bids, reports via API v5.
+  Use when the user needs to work with Yandex Direct API — campaign management,
+  ad groups, ads, keywords, bids, targeting, reports, statistics, dictionaries,
+  or any other Yandex Direct API operation.
+  Triggers: Yandex Direct, Direct API, campaigns API, ad management API,
+  keyword bids, Yandex advertising API, Direct reports, Direct statistics.
 ---
 
 # Yandex Direct API v5
