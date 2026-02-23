@@ -1,7 +1,7 @@
 #!/bin/bash
 # Common functions for Yandex Direct API v5
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/../config/.env"
 CACHE_DIR="$SCRIPT_DIR/../cache"
 

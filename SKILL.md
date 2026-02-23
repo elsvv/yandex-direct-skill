@@ -151,14 +151,149 @@ YANDEX_DIRECT_SANDBOX=true
 YANDEX_DIRECT_CLIENT_LOGIN=client_login
 ```
 
-### Helper Functions
+## Scripts
 
-Source `scripts/common.sh` for:
-- `load_config` -- loads .env, sets API base URL
-- `direct_request "service" 'json_body'` -- makes API call with auth headers
-- `direct_report 'json_body'` -- makes report request with report-specific headers
-- `format_json` -- pretty-print with jq if available
-- `json_value "$json" "key"` -- extract value without jq
+**IMPORTANT:** Always run scripts with `bash` prefix and **absolute paths** from the skill directory. Scripts use bash-specific features and will not work if sourced from zsh. Do NOT `source scripts/common.sh` directly — use the wrapper scripts below.
+
+### check_connection.sh
+Verify API token and list available campaigns.
+```bash
+bash scripts/check_connection.sh
+```
+
+### campaigns.sh
+Manage campaigns: list, get details, stats, suspend/resume/archive.
+```bash
+# List all campaigns
+bash scripts/campaigns.sh --action list
+
+# List only active campaigns
+bash scripts/campaigns.sh --action list --states ON
+
+# Get full campaign details
+bash scripts/campaigns.sh --action get --ids 12345678
+
+# Get campaign funds/spend info
+bash scripts/campaigns.sh --action stats --ids 12345678
+
+# Suspend a campaign
+bash scripts/campaigns.sh --action suspend --ids 12345678
+
+# Resume a campaign
+bash scripts/campaigns.sh --action resume --ids 12345678
+```
+
+| Param | Description |
+|-------|-------------|
+| `--action, -a` | list, get, stats, suspend, resume, archive, unarchive |
+| `--ids, -i` | Comma-separated campaign IDs |
+| `--states, -s` | Filter: ON, OFF, SUSPENDED, ENDED, ARCHIVED |
+| `--limit, -l` | Max results (default: 100) |
+
+### ads.sh
+Manage ads: list, get details, suspend/resume/moderate/archive.
+```bash
+# List ads by campaign
+bash scripts/ads.sh --action list --campaign-ids 12345678
+
+# List ads by ad group
+bash scripts/ads.sh --action list --adgroup-ids 987654
+
+# Get specific ad details
+bash scripts/ads.sh --action get --ad-ids 111222333
+
+# Suspend an ad
+bash scripts/ads.sh --action suspend --ad-ids 111222333
+```
+
+| Param | Description |
+|-------|-------------|
+| `--action, -a` | list, get, suspend, resume, moderate, archive |
+| `--campaign-ids` | Filter by campaign IDs |
+| `--adgroup-ids` | Filter by ad group IDs |
+| `--ad-ids` | Specific ad IDs |
+| `--limit, -l` | Max results (default: 1000) |
+
+### keywords.sh
+Manage keywords and autotargeting.
+```bash
+# List keywords by campaign
+bash scripts/keywords.sh --action list --campaign-ids 12345678
+
+# List keywords by ad group
+bash scripts/keywords.sh --action list --adgroup-ids 987654
+
+# Suspend keywords
+bash scripts/keywords.sh --action suspend --ids 111,222,333
+```
+
+### reports.sh
+Pull statistics reports (campaign, ad group, ad, keyword level).
+```bash
+# Campaign performance (last 30 days)
+bash scripts/reports.sh
+
+# Campaign performance for custom date range
+bash scripts/reports.sh --date-range CUSTOM_DATE --date-from 2026-01-01 --date-to 2026-01-31
+
+# Ad-level performance
+bash scripts/reports.sh --type AD_PERFORMANCE_REPORT \
+  --fields "AdId,AdGroupId,Impressions,Clicks,Ctr,AvgCpc,Cost"
+
+# Keyword/criteria performance with filter
+bash scripts/reports.sh --type CRITERIA_PERFORMANCE_REPORT \
+  --fields "CriteriaType,Criteria,Impressions,Clicks,Ctr,AvgCpc,Cost" \
+  --filter '{"Field":"CampaignId","Operator":"EQUALS","Values":["12345678"]}'
+
+# Demographics (age/gender)
+bash scripts/reports.sh --type CAMPAIGN_PERFORMANCE_REPORT \
+  --fields "Age,Gender,Impressions,Clicks,Ctr,Cost"
+
+# Search queries report
+bash scripts/reports.sh --type SEARCH_QUERY_PERFORMANCE_REPORT \
+  --fields "Query,Impressions,Clicks,Ctr,Cost"
+
+# Save report to file
+bash scripts/reports.sh --output report.tsv
+
+# Predefined date ranges
+bash scripts/reports.sh --date-range YESTERDAY
+bash scripts/reports.sh --date-range LAST_7_DAYS
+bash scripts/reports.sh --date-range THIS_MONTH
+```
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `--type, -t` | CAMPAIGN_PERFORMANCE_REPORT | Report type (see below) |
+| `--date-range, -r` | LAST_30_DAYS | Date range preset |
+| `--date-from` | — | Start date for CUSTOM_DATE |
+| `--date-to` | — | End date for CUSTOM_DATE |
+| `--fields, -f` | CampaignName,Impressions,Clicks,Ctr,AvgCpc,Cost | Fields |
+| `--filter` | — | Filter JSON |
+| `--output, -o` | stdout | Save to file |
+| `--name, -n` | auto-generated | Report name |
+
+Report types: ACCOUNT_PERFORMANCE_REPORT, CAMPAIGN_PERFORMANCE_REPORT, ADGROUP_PERFORMANCE_REPORT, AD_PERFORMANCE_REPORT, CRITERIA_PERFORMANCE_REPORT, SEARCH_QUERY_PERFORMANCE_REPORT, CUSTOM_REPORT
+
+Date ranges: TODAY, YESTERDAY, LAST_3_DAYS, LAST_7_DAYS, LAST_14_DAYS, LAST_30_DAYS, LAST_90_DAYS, THIS_MONTH, LAST_MONTH, ALL_TIME, CUSTOM_DATE
+
+### dictionaries.sh
+Get reference data (regions, currencies, etc.).
+```bash
+bash scripts/dictionaries.sh --dict GeoRegions
+bash scripts/dictionaries.sh --dict Currencies
+```
+
+### Advanced: common.sh functions
+
+For custom API calls not covered by scripts above, use `common.sh` functions. **Must be run inside a bash script** (not sourced from zsh):
+
+```bash
+#!/bin/bash
+source /path/to/scripts/common.sh
+load_config
+response=$(direct_request "campaigns" '{"method":"get","params":{...}}')
+```
 
 ## All API v5 Services
 
